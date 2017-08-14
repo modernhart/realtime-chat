@@ -16,9 +16,11 @@
 	}
 
 </style>
+<title>real time random chat</title>
 </head>
 <body>
 	<div class="container">
+		<!-- 유저 리스트 출력 -->
 		<h1>connection User</h1>
 		<div class="user" id="user">
 
@@ -29,7 +31,7 @@
     <form class="form-inline">
       <div class="form-group">
         <label for="msgForm">Message: </label>
-        <input type="text" class="form-control" id="msgForm" required>
+        <input type="text" class="form-control" id="msgForm" size="50" required>
       </div>
       <button type="submit" class="btn btn-primary">Send</button>
     </form>
@@ -37,28 +39,12 @@
   </div>
 </body>
 <script>
-
-//접속자 랜덤 이름 부여
-function randUser(){
-	var name = "user";
-
-	//1~100까지의 랜덤숫자
-	var randn = parseInt((Math.random()*100)+1);
-	var num = randn.toString();
-	return name+num;
-}
-
 $(function(){
 
 	//클라이언트 스크립트
 	var socket = io();
-	var name = "";
-	socket.emit("login",{
-		name : randUser()
-	});
-
-	socket.on('login',function(data){
-		$("#chat").append("<p>"+data+" has joined!</p>");
+	socket.on('join_notice',function(name){
+		$("#chat").append("<p>"+name+" has joined!</p>");
 	});
 
 	$("form").submit(function(e){
@@ -67,6 +53,18 @@ $(function(){
 
 		socket.emit('chat',{msg : msg.val(), name: name});
 		msg.val("");
+	});
+
+	//접속 중 유저목록
+	socket.on('ulist',function(userlist){
+		$("#user").empty();
+		$.each(userlist, function(index, value){
+			$("#user").append("<p>"+value+"</p>");
+		});
+	});
+	//whoami
+	socket.on("whoami",function(name){
+		$("#msgForm").attr('placeholder',name);
 	});
 
 	socket.on('chat',function(data){
