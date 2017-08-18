@@ -3,6 +3,19 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
+app.get('/',function(req,res){
+	res.sendFile(__dirname+"/chatuser.html");
+});
+
+app.get('/home',function(req,res){
+	res.sendFile(__dirname+"/lobby.html");
+});
+
+app.get('/chat',function(req,res){
+	res.sendFile(__dirname+"/roomuser.html");
+});
+
+
 //접속자 랜덤 이름 부여
 var randUser = function(){
 	var name = "user";
@@ -15,13 +28,6 @@ var randUser = function(){
 
 var users = new Array();
 
-app.get('/',function(req,res){
-	res.sendFile(__dirname+"/chatuser.html");
-});
-
-app.get('/home',function(req,res){
-	res.sendFile(__dirname+"/lobby.html");
-});
 
 io.sockets.on('connection',function(socket){
 	var exist = true;

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+<style>
+
+	body{
+		margin: 0;
+	}
+
+	#container {
+		margin: 10px auto;
+		/*padding: 20px;*/
+	}
+	
+	#header {
+		margin-bottom: 20px;
+		border-bottom: 1px solid #bcbcbc;
+		text-align: center;
+		box-shadow: 0px 2px 0px darkgrey;
+	}
+	
+	#content {
+		padding: 20px;
+		margin-bottom: 20px;
+		min-height: 300px;
+		max-height: 300px;
+		overflow-y: auto;
+		word-break: break-all;
+	}
+	
+	#sidebar {
+		padding: 5px 20px;
+		background: floralwhite;
+	}
+	
+	#msg {
+		padding: 10px;
+		border-top: 1px solid #bcbcbc;
+		background: lavender;
+	}
+	#msg input[type=text]{
+		border: none;
+		height: 40px;
+		width: 80%;
+		font-size: 20px;
+		vertical-align: middle;
+	}
+	#msg button{
+		width: 17%;
+		height: 40px;
+		font-size: 15px;
+		border: none;
+		vertical-align: middle;
+		background: pink;
+		color: white;
+		font-weight: bold;
+	}
+	
+	::-webkit-input-placeholder { /* Chrome */
+	  color: gainsboro;
+	  padding-left: 3px;
+	}
+	:-ms-input-placeholder { /* IE 10+ */
+	  color: gainsboro;
+	}
+	::-moz-placeholder { /* Firefox 19+ */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	:-moz-placeholder { /* Firefox 4 - 18 */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	@media ( min-width: 900px ) {
+		#container {
+		  width: 940px;
+		}
+		#content {
+		  width: 580px;
+		  float: left;
+		  min-height: 500px;
+		  max-height: 500px;
+		}
+		#sidebar {
+		  width: 260px;
+		  float: right;
+		}
+		#msg {
+		  clear: both;
+		}
+	}
+</style>
+<title>real time random chat</title>
+</head>
+<body>
+<div id="container">
+      <div id="header">
+        <h2 style="line-height:4px;">room</h2>
+      </div>
+	  <!-- 유저 리스트 출력 -->
+	  <div id="sidebar">
+		<h3>Connection User</h3>
+		<div id="user"></div>
+      </div>
+      <div id="content" class="chat">
+	  <!-- 메시지 내용 -->
+	  <div style="display:none; text-align: center; height: 25px; background: #f5f5f5; margin: 0 180px; border-radius: 10px;"><p>user100 has joined!</p></div>
+      </div>
+      <div id="msg">
+        <input type="text" id="msgForm">
+		<button type="submit" id="sendmsg">SEND</button>
+      </div>
+    </div>
+</body>
+<script>
+function nomsg(){
+	var msg = $("#msgForm").val();
+	if(msg == ""){
+		return false;
+	}else{
+		$("#sendmsg").attr('disabled',false);
+		return true;
+	}
+}
+
+$(function(){
+	$("#msgForm").focus();
+	$("body").keydown(function(e){
+		console.log(e.keyCode);
+	
+	});
+	var who = "";
+	//클라이언트 스크립트
+	var socket = io();
+	
+	//알리미
+	socket.on('join_notice',function(name){
+		$(".chat").append("<p style='text-align:center;'>"+name+" has joined!</p>");
+	});
+
+	//접속 중 유저목록
+	socket.on('ulist',function(userlist){
+		$("#user").empty();
+		$.each(userlist, function(index, value){
+			$("#user").append("<p>"+value+"</p>");
+		});
+	});
+	//whoami
+	socket.on("whoami",function(name){
+		$("#msgForm").attr('placeholder',name);
+		who = name;
+	});
+
+
+	//채팅 메시지 전송
+	$("#sendmsg").click(function(){
+		var notemp = nomsg();
+		if(notemp){
+			var msg = $("#msgForm");
+			socket.emit('chat',{msg : msg.val()});
+			msg.val("");
+		}
+	});
+	$("#msgForm").keydown(function(e){
+		var notemp = nomsg();
+		if(notemp && e.keyCode === 13){
+			var msg = $("#msgForm");
+			socket.emit('chat',{msg : msg.val()});
+			msg.val("");
+		}
+	});
+	
+	socket.on('chat',function(data){
+		if(data.name === who){
+			$(".chat").append("<p style='color:blue; text-align: right; padding-left: 200px;'>"+data.name+" : "+data.msg+"</p>");
+		}else{
+			$(".chat").append("<p style='color:blue; text-align: left; padding-right: 200px;'>"+data.name+" : "+data.msg+"</p>");
+		}
+		$(".chat").scrollTop($(".chat")[0].scrollHeight);
+		console.log(data.name+"   "+who);
+	});
+	socket.on('disconnect',function(data){
+		$(".chat").append("<p style='color:red; text-align:center;'>"+data+" has left </p>");
+	});
+
+});
+</script>
+</html>
