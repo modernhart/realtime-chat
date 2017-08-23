@@ -15,14 +15,14 @@
 		margin: 10px auto;
 		/*padding: 20px;*/
 	}
-	
+
 	#header {
 		margin-bottom: 20px;
 		border-bottom: 1px solid #bcbcbc;
 		text-align: center;
 		box-shadow: 0px 2px 0px darkgrey;
 	}
-	
+
 	#content {
 		padding: 20px;
 		margin-bottom: 20px;
@@ -31,12 +31,56 @@
 		overflow-y: auto;
 		word-break: break-all;
 	}
-	
+
 	#sidebar {
 		padding: 5px 20px;
 		background: floralwhite;
 	}
-	
+	#notice_j{
+		text-align: center;
+		margin: 1.3em 11em;
+		background: rgb(183, 183, 183);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+	#notice_x{
+		text-align: center;
+		margin: 1.3em 11em;
+		background: rgb(255, 142, 142);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+	#yourchat{
+		color: white;
+    width: fit-content;
+    padding: 0.5em;
+    background: rgb(120, 204, 255);
+    border-radius: 10px;
+    font-weight: bold;
+		margin-right: 10em;
+		float: left;
+		clear: both;
+	}
+
+	#mychat{
+		color: white;
+    width: fit-content;
+    padding: 0.5em;
+    float: right;
+    background: rgb(165, 147, 255);
+    border-radius: 10px;
+    font-weight: bold;
+    margin-left: 10em;
+		float: right;
+		clear: both;
+	}
+
 	#msg {
 		padding: 10px;
 		border-top: 1px solid #bcbcbc;
@@ -59,7 +103,7 @@
 		color: white;
 		font-weight: bold;
 	}
-	
+
 	::-webkit-input-placeholder { /* Chrome */
 	  color: gainsboro;
 	  padding-left: 3px;
@@ -101,18 +145,21 @@
       <div id="header">
         <h2 style="line-height:4px;">room</h2>
       </div>
-	  <!-- 유저 리스트 출력 -->
+	  <!-- user list -->
 	  <div id="sidebar">
 		<h3>Connection User</h3>
 		<div id="user"></div>
       </div>
       <div id="content" class="chat">
-	  <!-- 메시지 내용 -->
+	  <!-- message -->
 	  <div style="display:none; text-align: center; height: 25px; background: #f5f5f5; margin: 0 180px; border-radius: 10px;"><p>user100 has joined!</p></div>
       </div>
       <div id="msg">
         <input type="text" id="msgForm">
-		<button type="submit" id="sendmsg">SEND</button>
+				<button type="submit" id="sendmsg">SEND</button>
+      </div>
+			<div id="msg">
+				<button id="bgchangeColor">change background color</button>
       </div>
     </div>
 </body>
@@ -131,18 +178,18 @@ $(function(){
 	$("#msgForm").focus();
 	$("body").keydown(function(e){
 		console.log(e.keyCode);
-	
+
 	});
 	var who = "";
-	//클라이언트 스크립트
+
 	var socket = io();
-	
-	//알리미
+
+	//notice
 	socket.on('join_notice',function(name){
-		$(".chat").append("<p style='text-align:center;'>"+name+" has joined!</p>");
+		$(".chat").append("<p id='notice_j'>"+name+" has joined!</p>");
 	});
 
-	//접속 중 유저목록
+	//online user list
 	socket.on('ulist',function(userlist){
 		$("#user").empty();
 		$.each(userlist, function(index, value){
@@ -156,7 +203,7 @@ $(function(){
 	});
 
 
-	//채팅 메시지 전송
+	//send message
 	$("#sendmsg").click(function(){
 		var notemp = nomsg();
 		if(notemp){
@@ -173,20 +220,29 @@ $(function(){
 			msg.val("");
 		}
 	});
-	
+
 	socket.on('chat',function(data){
 		if(data.name === who){
-			$(".chat").append("<p style='color:blue; text-align: right; padding-left: 200px;'>"+data.name+" : "+data.msg+"</p>");
+			$(".chat").append("<p id='mychat'>"+data.name+" : "+data.msg+"</p>");
 		}else{
-			$(".chat").append("<p style='color:blue; text-align: left; padding-right: 200px;'>"+data.name+" : "+data.msg+"</p>");
+			$(".chat").append("<p id='yourchat'>"+data.name+" : "+data.msg+"</p>");
 		}
 		$(".chat").scrollTop($(".chat")[0].scrollHeight);
 		console.log(data.name+"   "+who);
 	});
 	socket.on('disconnect',function(data){
-		$(".chat").append("<p style='color:red; text-align:center;'>"+data+" has left </p>");
+		$(".chat").append("<p id='notice_x'>"+data+" has left </p>");
 	});
 
+	$("#bgchangeColor").on('click',function(){
+		var bgcolor = $("#content").css('background-color');
+		if(bgcolor==="rgba(0, 0, 0, 0)"){
+			$("#content").css('background','#eeffef');
+		}else{
+			$("#content").css('background','rgba(0, 0, 0, 0)');
+		}
+		console.log(bgcolor);
+	});
 });
 </script>
 </html>
