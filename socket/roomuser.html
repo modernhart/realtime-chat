@@ -17,17 +17,22 @@
 	}
 
 	#header {
-		margin-bottom: 20px;
 		border-bottom: 1px solid #bcbcbc;
 		text-align: center;
 		box-shadow: 0px 2px 0px darkgrey;
 	}
+	#header a{
+		text-decoration: none;
+	}
+
+	#header a:hover{
+		text-decoration: none;
+	}
 
 	#content {
 		padding: 20px;
-		margin-bottom: 20px;
-		min-height: 300px;
-		max-height: 300px;
+		min-height: 33em;
+		max-height: 33em;
 		overflow-y: auto;
 		word-break: break-all;
 	}
@@ -35,10 +40,13 @@
 	#sidebar {
 		padding: 5px 20px;
 		background: floralwhite;
+		position: absolute;
+		width: 12em;
+		display: none;
 	}
 	#notice_j{
 		text-align: center;
-		margin: 1.3em 11em;
+		margin: 1.3em 10em;
 		background: rgb(183, 183, 183);
 		color: #fff;
 		height: 1.5em;
@@ -48,7 +56,7 @@
 	}
 	#notice_x{
 		text-align: center;
-		margin: 1.3em 11em;
+		margin: 1.3em 10em;
 		background: rgb(255, 142, 142);
 		color: #fff;
 		height: 1.5em;
@@ -104,6 +112,24 @@
 		font-weight: bold;
 	}
 
+	#msg .bg_btn{
+		width: 3.2em;
+		height: 40px;
+		border: none;
+		border-radius: 30px;
+	}
+	#msg #bg_pink{
+		background-color: #ffdce2;
+	}
+	#msg #bg_green{
+		background-color: #eeffef;
+	}
+	#msg #bg_blue{
+		background-color: rgb(213, 235, 255);
+	}
+	#msg #bg_yellow{
+		background-color: #ffff91;
+	}
 	::-webkit-input-placeholder { /* Chrome */
 	  color: gainsboro;
 	  padding-left: 3px;
@@ -123,18 +149,29 @@
 		#container {
 		  width: 940px;
 		}
+		#header{
+			margin-bottom: 20px;
+		}
 		#content {
 		  width: 580px;
 		  float: left;
 		  min-height: 500px;
 		  max-height: 500px;
+			margin-bottom: 20px;
 		}
 		#sidebar {
 		  width: 260px;
 		  float: right;
+			position: relative;
+			display: block;
 		}
 		#msg {
 		  clear: both;
+		}
+	}
+	@media (max-width : 520px) {
+		#notice_j, #notice_x{
+			margin: 1.3em 7em;
 		}
 	}
 </style>
@@ -142,24 +179,27 @@
 </head>
 <body>
 <div id="container">
+	<div id="side"></div>
       <div id="header">
-        <h2 style="line-height:4px;">room</h2>
+        <a href="#"><h2 style="line-height:4px;">room</h2></a>
       </div>
 	  <!-- user list -->
 	  <div id="sidebar">
-		<h3>Connection User</h3>
-		<div id="user"></div>
-      </div>
+			<h3>Connection User</h3>
+			<div id="user"></div>
+    </div>
       <div id="content" class="chat">
 	  <!-- message -->
-	  <div style="display:none; text-align: center; height: 25px; background: #f5f5f5; margin: 0 180px; border-radius: 10px;"><p>user100 has joined!</p></div>
       </div>
       <div id="msg">
         <input type="text" id="msgForm">
 				<button type="submit" id="sendmsg">SEND</button>
       </div>
 			<div id="msg">
-				<button id="bgchangeColor">change background color</button>
+				<button id="bg_pink" class="bg_btn"></button>
+				<button id="bg_green" class="bg_btn"></button>
+				<button id="bg_blue" class="bg_btn"></button>
+				<button id="bg_yellow" class="bg_btn"></button>
       </div>
     </div>
 </body>
@@ -176,6 +216,11 @@ function nomsg(){
 
 $(function(){
 	$("#msgForm").focus();
+
+	$("#header a").on('click',function(){
+		$("#sidebar").slideToggle();
+
+	});
 	$("body").keydown(function(e){
 		console.log(e.keyCode);
 
@@ -188,20 +233,20 @@ $(function(){
 	socket.on('join_notice',function(name){
 		$(".chat").append("<p id='notice_j'>"+name+" has joined!</p>");
 	});
-
-	//online user list
-	socket.on('ulist',function(userlist){
-		$("#user").empty();
-		$.each(userlist, function(index, value){
-			$("#user").append("<p>"+value+"</p>");
-		});
-	});
 	//whoami
 	socket.on("whoami",function(name){
 		$("#msgForm").attr('placeholder',name);
 		who = name;
 	});
 
+	//online user list
+	socket.on('ulist',function(userlist){
+		console.log(who);
+		$("#user").empty();
+		$.each(userlist, function(index, value){
+			$("#user").append("<p>"+value+"</p>");
+		});
+	});
 
 	//send message
 	$("#sendmsg").click(function(){
@@ -234,14 +279,16 @@ $(function(){
 		$(".chat").append("<p id='notice_x'>"+data+" has left </p>");
 	});
 
-	$("#bgchangeColor").on('click',function(){
+	$(".bg_btn").on('click',function(){
 		var bgcolor = $("#content").css('background-color');
-		if(bgcolor==="rgba(0, 0, 0, 0)"){
-			$("#content").css('background','#eeffef');
+		var theme = $(this).css('background-color');
+		console.log(theme);
+		if(bgcolor!=theme){
+			$("#content").css('background',theme);
 		}else{
 			$("#content").css('background','rgba(0, 0, 0, 0)');
 		}
-		console.log(bgcolor);
+		//console.log(bgcolor);
 	});
 });
 </script>
