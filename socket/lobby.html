@@ -3,53 +3,235 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+<style>
+
+	body{
+		margin: 0;
+	}
+
+	#container {
+		margin: 10px auto;
+		/*padding: 20px;*/
+	}
+
+	#header {
+		border-bottom: 1px solid #bcbcbc;
+		text-align: center;
+		box-shadow: 0px 2px 0px darkgrey;
+	}
+	#header a{
+		text-decoration: none;
+	}
+
+	#header a:hover{
+		text-decoration: none;
+	}
+
+	#content {
+		padding: 20px;
+		min-height: 33em;
+		max-height: 33em;
+		overflow-y: auto;
+		word-break: break-all;
+	}
+	#content_main {
+		padding: 20px;
+		min-height: 33em;
+		max-height: 33em;
+		overflow-y: auto;
+		word-break: break-all;
+	}
+	#sidebar {
+		padding: 5px 20px;
+		background: floralwhite;
+		position: absolute;
+		width: 12em;
+		display: none;
+	}
+	#notice_j{
+		text-align: center;
+		margin: 1.3em 10em;
+		background: rgb(183, 183, 183);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+	#notice_x{
+		text-align: center;
+		margin: 1.3em 10em;
+		background: rgb(255, 142, 142);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+	#yourchat{
+		color: white;
+    width: fit-content;
+    padding: 0.5em;
+    background: rgb(120, 204, 255);
+    border-radius: 10px;
+    font-weight: bold;
+		margin-right: 10em;
+		float: left;
+		clear: both;
+	}
+
+	#mychat{
+		color: white;
+    width: fit-content;
+    padding: 0.5em;
+    float: right;
+    background: rgb(165, 147, 255);
+    border-radius: 10px;
+    font-weight: bold;
+    margin-left: 10em;
+		float: right;
+		clear: both;
+	}
+
+	#msg {
+		padding: 10px;
+		border-top: 1px solid #bcbcbc;
+		background: lavender;
+	}
+	#msg input[type=text]{
+		border: none;
+		height: 40px;
+		width: 80%;
+		font-size: 20px;
+		vertical-align: middle;
+	}
+	#msg button{
+		width: 17%;
+		height: 40px;
+		font-size: 15px;
+		border: none;
+		vertical-align: middle;
+		background: pink;
+		color: white;
+		font-weight: bold;
+	}
+
+	#msg .bg_btn{
+		width: 3.2em;
+		height: 40px;
+		border: none;
+		border-radius: 30px;
+	}
+	#msg #join_room{
+		width: 98%;
+	}
+	#msg #bg_pink{
+		background-color: #ffdce2;
+	}
+	#msg #bg_green{
+		background-color: #eeffef;
+	}
+	#msg #bg_blue{
+		background-color: rgb(213, 235, 255);
+	}
+	#msg #bg_yellow{
+		background-color: #ffff91;
+	}
+	::-webkit-input-placeholder { /* Chrome */
+	  color: gainsboro;
+	  padding-left: 3px;
+	}
+	:-ms-input-placeholder { /* IE 10+ */
+	  color: gainsboro;
+	}
+	::-moz-placeholder { /* Firefox 19+ */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	:-moz-placeholder { /* Firefox 4 - 18 */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	@media ( min-width: 900px ) {
+		#container {
+		  width: 940px;
+		}
+		#header{
+			margin-bottom: 20px;
+		}
+		#content {
+		  width: 580px;
+		  float: left;
+		  min-height: 500px;
+		  max-height: 500px;
+			margin-bottom: 20px;
+		}
+		#sidebar {
+		  width: 260px;
+		  float: right;
+			position: relative;
+			display: block;
+		}
+		#msg {
+		  clear: both;
+		}
+	}
+	@media (max-width : 520px) {
+		#notice_j, #notice_x{
+			margin: 1.3em 7em;
+		}
+	}
+</style>
+<title>real time random chat</title>
 </head>
 <body>
-<button id="joinroom" type="button">join the room</button>
+<div id="container">
+	<div id="side"></div>
+      <div id="header">
+        <h2 style="line-height:4px;">home</h2>
+      </div>
+      <div id="content_main">
+				<div>create chatroom</div>
+				<div class="room1" style="cursor:pointer;">room1</div>
+      </div>
+      <div id="msg">
+				<button type="submit" id="join_room">JOIN</button>
+      </div>
+			<div id="msg">
+				<button id="bg_pink" class="bg_btn"></button>
+				<button id="bg_green" class="bg_btn"></button>
+				<button id="bg_blue" class="bg_btn"></button>
+				<button id="bg_yellow" class="bg_btn"></button>
+      </div>
+    </div>
 </body>
 <script>
-
-//접속자 랜덤 이름 부여
-function randUser(){
-	var name = "user";
-
-	//1~100까지의 랜덤숫자
-	var randn = parseInt((Math.random()*100)+1);
-	var num = randn.toString();
-	return name+num;
-}
-
 $(function(){
-
-	//클라이언트 스크립트
-	var socket = io();
-	var name = "";
-	socket.emit("login",{
-		name : randUser()
+	var socket = io.connect('http://localhost:3000');
+	$(".room1").on('click',function(){
+		alert("dd");
 	});
 
-	socket.on('login',function(data){
-		$("#chat").append("<p>"+data+" has joined!</p>");
-	});
+	$("#join_room").on('click',function(){
+		window.open('/chat?r=1');
 
-	$("form").submit(function(e){
-		e.preventDefault();
-		var msg = $("#msgForm");
-
-		socket.emit('chat',{msg : msg.val(), name: name});
-		msg.val("");
 	});
-
-	socket.on('chat',function(data){
-		$("#chat").append("<p style='color:blue;'>"+data.name+" : "+data.msg+"</p>");
+ 	socket.on('join_notice',function(data){
+		//alert(data);
 	});
-	socket.on('disconnect',function(data){
-		$("#chat").append("<p style='color:red;'>"+data+" has left </p>");
+	$(".bg_btn").on('click',function(){
+		var bgcolor = $("#content_main").css('background-color');
+		var theme = $(this).css('background-color');
+		console.log(theme);
+		if(bgcolor!=theme){
+			$("#content_main").css('background',theme);
+		}else{
+			$("#content_main").css('background','rgba(0, 0, 0, 0)');
+		}
+		//console.log(bgcolor);
 	});
-
-});
+})
 </script>
 </html>
