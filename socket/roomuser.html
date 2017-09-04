@@ -64,19 +64,20 @@
 		border-radius: 15px;
 		clear: both;
 	}
-	#yourchat{
+
+	.chat>p[id^="yourchat"]{
 		color: white;
-    width: fit-content;
-    padding: 0.5em;
-    background: rgb(120, 204, 255);
-    border-radius: 10px;
-    font-weight: bold;
+		width: fit-content;
+		padding: 0.5em;
+		background: rgb(120, 204, 255);
+		border-radius: 10px;
+		font-weight: bold;
 		margin-right: 10em;
 		float: left;
 		clear: both;
 	}
 
-	#mychat{
+	.chat>p[id^="mychat"]{
 		color: white;
     width: fit-content;
     padding: 0.5em;
@@ -171,7 +172,7 @@
 	}
 	@media (max-width : 520px) {
 		#notice_j, #notice_x{
-			margin: 1.3em 7em;
+			margin: 1.3em 4em;
 		}
 	}
 </style>
@@ -226,12 +227,13 @@ $(function(){
 
 	});
 	var who = "";
-
+  var i = 0;  //채팅 내용
 	var socket = io();
 
 	//notice
 	socket.on('join_notice',function(name){
 		$(".chat").append("<p id='notice_j'>"+name+" has joined!</p>");
+		$(".chat").scrollTop($(".chat")[0].scrollHeight);
 	});
 	//whoami
 	socket.on("whoami",function(name){
@@ -240,12 +242,32 @@ $(function(){
 	});
 
 	//online user list
-	socket.on('ulist',function(userlist){
-		console.log(who);
+	socket.on('ulist',function(userlist,me){
+		console.log(me);
 		$("#user").empty();
 		$.each(userlist, function(index, value){
 			$("#user").append("<p>"+value+"</p>");
 		});
+	});
+
+	socket.on('chat',function(data){
+		if(data.name === who){
+			$(".chat").append("<p style='display:none;' id='mychat"+i+"'>"+data.name+" : "+data.msg+"</p>");
+			$("#mychat"+i).slideDown(210,function(){
+				$(".chat").scrollTop($(".chat")[0].scrollHeight);
+			});
+			i++;
+		}else{
+			$(".chat").append("<p style='display:none;' id='yourchat"+i+"'>"+data.name+" : "+data.msg+"</p>");
+			$("#yourchat"+i).slideDown(210,function(){
+				$(".chat").scrollTop($(".chat")[0].scrollHeight);
+			});
+			i++;
+		}
+	});
+	socket.on('disconnect',function(data){
+		$(".chat").append("<p id='notice_x'>"+data+" has left </p>");
+		$(".chat").scrollTop($(".chat")[0].scrollHeight);
 	});
 
 	//send message
@@ -266,17 +288,8 @@ $(function(){
 		}
 	});
 
-	socket.on('chat',function(data){
-		if(data.name === who){
-			$(".chat").append("<p id='mychat'>"+data.name+" : "+data.msg+"</p>");
-		}else{
-			$(".chat").append("<p id='yourchat'>"+data.name+" : "+data.msg+"</p>");
-		}
-		$(".chat").scrollTop($(".chat")[0].scrollHeight);
-		console.log(data.name+"   "+who);
-	});
-	socket.on('disconnect',function(data){
-		$(".chat").append("<p id='notice_x'>"+data+" has left </p>");
+	$("#msgForm").on('keypress',function(){
+		socket.emit('doing','y');
 	});
 
 	$(".bg_btn").on('click',function(){

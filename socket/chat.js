@@ -28,7 +28,6 @@ var randUser = function(){
 
 var users = new Array();
 
-
 io.sockets.on('connection',function(socket){
 	var exist = true;
 	//해당 유저명이 존재한다면
@@ -42,7 +41,7 @@ io.sockets.on('connection',function(socket){
 	for(var i in users){
 		userlist.push(users[i]);
 	}
-	io.sockets.emit("ulist",userlist);
+	io.sockets.emit("ulist",userlist,username);
 	socket.emit('whoami',username);
 
 	socket.on("chat",function(data){
@@ -53,6 +52,9 @@ io.sockets.on('connection',function(socket){
 		};
 		io.emit('chat',msg);
 	});
+	/*socket.on('doing',function(data){
+		socket.broadcast.emit('doingmsg',{'msg'});
+	});*/
 
 	socket.on('disconnect', function() {
 		delete users[socket.name];

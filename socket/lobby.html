@@ -190,26 +190,15 @@
 <div id="container">
 	<div id="side"></div>
       <div id="header">
-        <h2 style="line-height:4px;">home</h2>
-      </div>
-      <div id="content_main">
-				<div>create chatroom</div>
-				<div class="room1" style="cursor:pointer;">room1</div>
+        <h2 style="line-height:4px;">real-time chat</h2>
       </div>
       <div id="msg">
 				<button type="submit" id="join_room">JOIN</button>
-      </div>
-			<div id="msg">
-				<button id="bg_pink" class="bg_btn"></button>
-				<button id="bg_green" class="bg_btn"></button>
-				<button id="bg_blue" class="bg_btn"></button>
-				<button id="bg_yellow" class="bg_btn"></button>
       </div>
     </div>
 </body>
 <script>
 $(function(){
-	var socket = io.connect('http://localhost:3000');
 	$(".room1").on('click',function(){
 		alert("dd");
 	});
@@ -217,20 +206,6 @@ $(function(){
 	$("#join_room").on('click',function(){
 		window.open('/chat?r=1');
 
-	});
- 	socket.on('join_notice',function(data){
-		//alert(data);
-	});
-	$(".bg_btn").on('click',function(){
-		var bgcolor = $("#content_main").css('background-color');
-		var theme = $(this).css('background-color');
-		console.log(theme);
-		if(bgcolor!=theme){
-			$("#content_main").css('background',theme);
-		}else{
-			$("#content_main").css('background','rgba(0, 0, 0, 0)');
-		}
-		//console.log(bgcolor);
 	});
 })
 </script>
