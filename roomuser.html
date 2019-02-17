@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+<style>
+
+	body{
+		margin: 0;
+	}
+
+	#container {
+		margin: 10px auto;
+		/*padding: 20px;*/
+	}
+
+	#header {
+		border-bottom: 1px solid #bcbcbc;
+		text-align: center;
+		box-shadow: 0px 2px 0px darkgrey;
+	}
+	#header a{
+		text-decoration: none;
+	}
+
+	#header a:hover{
+		text-decoration: none;
+	}
+
+	#content {
+		padding: 20px;
+		min-height: 33em;
+		max-height: 33em;
+		overflow-y: auto;
+		word-break: break-all;
+	}
+
+	#sidebar {
+		padding: 5px 20px;
+		background: floralwhite;
+		position: absolute;
+		width: 12em;
+		display: none;
+	}
+	#notice_j{
+		text-align: center;
+		margin: 1.3em 10em;
+		background: rgb(183, 183, 183);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+	#notice_x{
+		text-align: center;
+		margin: 1.3em 10em;
+		background: rgb(255, 142, 142);
+		color: #fff;
+		height: 1.5em;
+		font-weight: bold;
+		border-radius: 15px;
+		clear: both;
+	}
+
+	.chat>p[id^="yourchat"]{
+		color: white;
+		width: fit-content;
+		padding: 0.5em;
+		background: rgb(120, 204, 255);
+		border-radius: 10px;
+		font-weight: bold;
+		margin-right: 10em;
+		float: left;
+		clear: both;
+	}
+
+	.chat>p[id^="mychat"]{
+		color: white;
+    width: fit-content;
+    padding: 0.5em;
+    float: right;
+    background: rgb(165, 147, 255);
+    border-radius: 10px;
+    font-weight: bold;
+    margin-left: 10em;
+		float: right;
+		clear: both;
+	}
+
+	#msg {
+		padding: 10px;
+		border-top: 1px solid #bcbcbc;
+		background: lavender;
+	}
+	#msg input[type=text]{
+		border: none;
+		height: 40px;
+		width: 80%;
+		font-size: 20px;
+		vertical-align: middle;
+	}
+	#msg button{
+		width: 17%;
+		height: 40px;
+		font-size: 15px;
+		border: none;
+		vertical-align: middle;
+		background: pink;
+		color: white;
+		font-weight: bold;
+	}
+
+	#msg .bg_btn{
+		width: 3.2em;
+		height: 40px;
+		border: none;
+		border-radius: 30px;
+	}
+	#msg #join_room{
+		width: 98%;
+	}
+	#msg #bg_pink{
+		background-color: #ffdce2;
+	}
+	#msg #bg_green{
+		background-color: #eeffef;
+	}
+	#msg #bg_blue{
+		background-color: rgb(213, 235, 255);
+	}
+	#msg #bg_yellow{
+		background-color: #ffff91;
+	}
+	::-webkit-input-placeholder { /* Chrome */
+	  color: gainsboro;
+	  padding-left: 3px;
+	}
+	:-ms-input-placeholder { /* IE 10+ */
+	  color: gainsboro;
+	}
+	::-moz-placeholder { /* Firefox 19+ */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	:-moz-placeholder { /* Firefox 4 - 18 */
+	  color: gainsboro;
+	  opacity: 1;
+	}
+	@media ( min-width: 900px ) {
+		#container {
+		  width: 940px;
+		}
+		#header{
+			margin-bottom: 20px;
+		}
+		#content {
+		  width: 580px;
+		  float: left;
+		  min-height: 500px;
+		  max-height: 500px;
+			margin-bottom: 20px;
+		}
+		#sidebar {
+		  width: 260px;
+		  float: right;
+			position: relative;
+			display: block;
+		}
+		#msg {
+		  clear: both;
+		}
+	}
+	@media (max-width : 520px) {
+		#notice_j, #notice_x{
+			margin: 1.3em 4em;
+		}
+	}
+</style>
+<title>real time random chat</title>
+</head>
+<body>
+<div id="container">
+	<div id="side"></div>
+      <div id="header">
+        <a href="#"><h2 style="line-height:4px;">room</h2></a>
+      </div>
+	  <!-- user list -->
+	  <div id="sidebar">
+			<h3>Connection User</h3>
+			<div id="user"></div>
+    </div>
+      <div id="content" class="chat">
+	  <!-- message -->
+      </div>
+      <div id="msg">
+        <input type="text" id="msgForm">
+				<button type="submit" id="sendmsg">SEND</button>
+      </div>
+			<div id="msg">
+				<button id="bg_pink" class="bg_btn"></button>
+				<button id="bg_green" class="bg_btn"></button>
+				<button id="bg_blue" class="bg_btn"></button>
+				<button id="bg_yellow" class="bg_btn"></button>
+      </div>
+    </div>
+</body>
+<script>
+function nomsg(){
+	var msg = $("#msgForm").val();
+	if(msg == ""){
+		return false;
+	}else{
+		$("#sendmsg").attr('disabled',false);
+		return true;
+	}
+}
+
+$(function(){
+	$("#msgForm").focus();
+
+	$("#header a").on('click',function(){
+		$("#sidebar").slideToggle();
+
+	});
+	$("body").keydown(function(e){
+		console.log(e.keyCode);
+
+	});
+	var who = "";
+  var i = 0;  //채팅 내용
+	var socket = io();
+
+	//notice
+	socket.on('join_notice',function(name){
+		$(".chat").append("<p id='notice_j'>"+name+" has joined!</p>");
+		$(".chat").scrollTop($(".chat")[0].scrollHeight);
+	});
+	//whoami
+	socket.on("whoami",function(name){
+		$("#msgForm").attr('placeholder',name);
+		who = name;
+	});
+
+	//online user list
+	socket.on('ulist',function(userlist,me){
+		console.log(me);
+		$("#user").empty();
+		$.each(userlist, function(index, value){
+			$("#user").append("<p>"+value+"</p>");
+		});
+	});
+
+	socket.on('chat',function(data){
+		if(data.name === who){
+			$(".chat").append("<p style='display:none;' id='mychat"+i+"'>"+data.name+" : "+data.msg+"</p>");
+			$("#mychat"+i).slideDown(210,function(){
+				$(".chat").scrollTop($(".chat")[0].scrollHeight);
+			});
+			i++;
+		}else{
+			$(".chat").append("<p style='display:none;' id='yourchat"+i+"'>"+data.name+" : "+data.msg+"</p>");
+			$("#yourchat"+i).slideDown(210,function(){
+				$(".chat").scrollTop($(".chat")[0].scrollHeight);
+			});
+			i++;
+		}
+	});
+	socket.on('disconnect',function(data){
+		$(".chat").append("<p id='notice_x'>"+data+" has left </p>");
+		$(".chat").scrollTop($(".chat")[0].scrollHeight);
+	});
+
+	//send message
+	$("#sendmsg").click(function(){
+		var notemp = nomsg();
+		if(notemp){
+			var msg = $("#msgForm");
+			socket.emit('chat',{msg : msg.val()});
+			msg.val("");
+		}
+	});
+	$("#msgForm").keydown(function(e){
+		var notemp = nomsg();
+		if(notemp && e.keyCode === 13){
+			var msg = $("#msgForm");
+			socket.emit('chat',{msg : msg.val()});
+			msg.val("");
+		}
+	});
+
+	$("#msgForm").on('keypress',function(){
+		socket.emit('doing','y');
+	});
+
+	$(".bg_btn").on('click',function(){
+		var bgcolor = $("#content").css('background-color');
+		var theme = $(this).css('background-color');
+		console.log(theme);
+		if(bgcolor!=theme){
+			$("#content").css('background',theme);
+		}else{
+			$("#content").css('background','rgba(0, 0, 0, 0)');
+		}
+		//console.log(bgcolor);
+	});
+});
+</script>
+</html>
