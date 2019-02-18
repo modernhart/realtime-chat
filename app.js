@@ -1,7 +1,7 @@
-var express = require('express');
-var app = express();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var port = process.env.PORT || 3000;
 
 app.get('/',function(req,res){
 	res.redirect('/home');
@@ -68,6 +68,6 @@ io.sockets.on('connection',function(socket){
   });
 });
 
-server.listen(3000,function(){
+http.listen(port,function(){
 	console.log("message io");
 });
