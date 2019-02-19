@@ -1,10 +1,15 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
+var path = require('path');
+
+app.use(express.static('public'));
 
 app.get('/',function(req,res){
-	res.redirect('/home');
+	//res.redirect('/home');
+	res.redirect('/talk');
 });
 
 app.get('/home',function(req,res){
@@ -13,6 +18,10 @@ app.get('/home',function(req,res){
 
 app.get('/chat',function(req,res){
 	res.sendFile(__dirname+"/roomuser.html");
+});
+
+app.get('/talk',function(req,res){
+	res.sendFile(__dirname+"/chatting.html");
 });
 
 
@@ -24,15 +33,15 @@ var randUser = function(){
 	var randn = parseInt((Math.random()*100)+1);
 	var num = randn.toString();
 	return name+num;
-}
+};
 
-var users = new Array();
+var users = [];
 
 io.sockets.on('connection',function(socket){
 	var exist = true;
 	//해당 유저명이 존재한다면
 	username = randUser();
-	io.emit('join_notice',username);
+	io.emit('join',username);
 	socket.name = username;
 
 	console.log("client "+username+" has logined");
