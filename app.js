@@ -46,7 +46,7 @@ io.sockets.on('connection',function(socket){
 
 	console.log("client "+username+" has logined");
 	users[socket.name] = username;
-	var userlist = new Array();
+	var userlist = [];
 	for(var i in users){
 		userlist.push(users[i]);
 	}
@@ -61,22 +61,27 @@ io.sockets.on('connection',function(socket){
 		};
 		io.emit('chat',msg);
 	});
-	/*socket.on('doing',function(data){
-		socket.broadcast.emit('doingmsg',{'msg'});
-	});*/
+	
+	//entering text
+	socket.on('entering', function(data) {
+		socket.broadcast.emit('entering');
+	});
+	
+	socket.on('stoping', function(data) {
+		socket.broadcast.emit('stoping');
+	});
 
 	socket.on('disconnect', function() {
 		delete users[socket.name];
-		var userlist = new Array();
+		var userlist = [];
 		for(var i in users){
 			userlist.push(users[i]);
 		}
 		io.sockets.emit('ulist',userlist);
-    console.log('user disconnected: ' + socket.name);
 		io.emit('disconnect',socket.name);
   });
 });
 
 http.listen(port,function(){
-	console.log("message io");
+	console.log("server is running");
 });

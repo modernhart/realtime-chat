@@ -40,7 +40,7 @@
 		return this;
 	};
 	$(function () {
-		var getMessage, message_side, sendMessage;
+		var getMessage, message_side, sendMessage, entering, initBtn;
 		getMessage = function (text, notice) {
 			var $messages, message;
 			if (notice) {
@@ -72,6 +72,20 @@
 			message.draw();
 			return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
 		};
+		entering = function() {
+			if (!$('.send_message').hasClass('entering')) {
+				$('.send_message')
+					.addClass('entering')
+					.html('<div></div>');
+				$('.send_message div')
+					.addClass('lds-ellipsis').html('<div></div><div></div><div></div><div></div>');
+			}
+		};
+		initBtn = function() {
+			$('.send_message')
+				.removeClass('entering')
+				.html('<div class="text">Send</div>');
+		};
 		$('.send_message').click(function (e) {
 			return sendMessage($('.message_input').val());
 		});
@@ -79,11 +93,28 @@
 			if (e.which === 13) {
 				return sendMessage($('.message_input').val());
 			}
+			if (!e.target.value) {
+				socket.emit('stoping', 'stoping');
+			}
 		});
+		setInterval(function() {
+			var input_value = $('.message_input').val();
+			if (input_value) {
+				socket.emit('entering', 'entering');
+			}
+		}, 500);
+		socket.on('entering', function() {
+			entering();
+		});
+		
+		socket.on('stoping', function() {
+			initBtn();
+		});
+		
 
 		//notice
 		socket.on('join',function(user){
-			getMessage("join the " + user, 'join');
+			getMessage("join a " + user, 'join');
 		});
 
 		socket.on('disconnect',function(user){
@@ -94,6 +125,7 @@
 			if(data.name !== who){
 				getMessage(data.msg);
 			}
+			initBtn();
 		});
 	});
 }.call(this));
