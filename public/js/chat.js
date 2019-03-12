@@ -7,6 +7,22 @@
 	var title = $('.title');
 	var modal = $('#myModal');
 	var close = $(".close");
+	var musicList = [
+		'Classy Music and Fine Restaurant.mp3',
+		'Happy Acoustic Background Music.mp3',
+		'Instrumental.mp3',
+		'Soul and Mind-Es Jammy Jams.mp3',
+		'peppu.mp3'
+	];
+	var imageList = [
+		'',
+		'https://scontent-nrt.cdninstagram.com/vp/ecd8c995dcf47657920d358f82df8911/5CC5803E/t51.2885-15/e35/47585680_2294664957262462_6920519029156769376_n.jpg?_nc_ht=scontent-ort2-2.cdninstagram.com&se=7&ig_cache_key=MTk0OTk1NTc4NDMyNjY0Njc0MQ%3D%3D.2',
+		'http://pognan.godohosting.com/product/curtain/blackout/shabbyrose/shabby_gray_list_545.jpg',
+		'http://image.kyobobook.co.kr/newimages/giftshop_new/goods/400/1367/hot1547796069427.jpg'
+	];
+	var musicIndex = Math.floor(Math.random() * musicList.length);
+	var music = new Audio('/music/' + musicList[musicIndex]);
+	music.loop = true;
 
 	if (window.navigator.userAgent.includes('Mobile')) {
 		$('.chat_window')
@@ -42,6 +58,24 @@
 		$.each(userlist, function(index, value){
 			$("#list").append("<li>" + value + "</li>");
 		});
+	});
+	
+	//music play
+	$('.music').on('click', function(e) {
+		var $this = $(this);
+		if ($this.hasClass('play')) {
+			music.pause();
+			$this.removeClass('play');
+		} else {
+			music.play();
+			$this.addClass('play');
+		}
+	});
+	
+	//image transition
+	$('.scene').on('click', function(e) {
+		var imageIndex = Math.floor(Math.random() * imageList.length);
+		$('.messages').css('background-image', `url("${imageList[imageIndex]}")`);
 	});
 
 	Message = function (arg) {

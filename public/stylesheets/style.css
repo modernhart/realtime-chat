@@ -33,17 +33,20 @@ body {
   position: absolute;
 }
 .top_menu .buttons .button {
-  width: 16px;
-  height: 16px;
+  width: 1.5em;
+  height: 1.5em;
   border-radius: 50%;
   display: inline-block;
   margin-right: 10px;
   position: relative;
 }
-.top_menu .buttons .button.close {
+.top_menu .buttons .button.music {
   background-color: #f5886e;
 }
-.top_menu .buttons .button.minimize {
+.top_menu .buttons .button.music.play {
+  background-color: #bd2805;
+}
+.top_menu .buttons .button.scene {
   background-color: #fdbf68;
 }
 .top_menu .buttons .button.maximize {
@@ -53,6 +56,7 @@ body {
   text-align: center;
   color: #bcbdc0;
   font-size: 20px;
+  margin : 0 14rem;
 }
 
 .messages {
@@ -64,6 +68,7 @@ body {
 	background-image: url('https://scontent-nrt.cdninstagram.com/vp/ecd8c995dcf47657920d358f82df8911/5CC5803E/t51.2885-15/e35/47585680_2294664957262462_6920519029156769376_n.jpg?_nc_ht=scontent-ort2-2.cdninstagram.com&se=7&ig_cache_key=MTk0OTk1NTc4NDMyNjY0Njc0MQ%3D%3D.2');
   background-repeat: round;
 }
+
 .messages .message {
   clear: both;
   overflow: hidden;
