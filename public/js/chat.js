@@ -4,6 +4,9 @@
 	var socket = io();
 	var mobileHeight = window.innerHeight;
 	var mobileWidth = window.innerWidth;
+	var title = $('.title');
+	var modal = $('#myModal');
+	var close = $(".close");
 
 	if (window.navigator.userAgent.includes('Mobile')) {
 		$('.chat_window')
@@ -13,10 +16,32 @@
 	}
 	$("#msgForm").focus();
 
+	title.on('click', function() {
+		modal.css('display', 'block');
+	});
+
+	close.on('click', function() {
+		modal.css('display', 'none');
+	});
+
+	$(window).on('click', function(event) {
+		if (event.target === modal[0]) {
+			modal.css('display', 'none');
+		}
+	});
+
 	//whoami
 	socket.on("whoami",function(name){
 		$("#msgForm").attr('placeholder',name);
 		who = name;
+	});
+	
+	//online user list
+	socket.on('ulist', function(userlist, me) {
+		$("#list").empty();
+		$.each(userlist, function(index, value){
+			$("#list").append("<li>" + value + "</li>");
+		});
 	});
 
 	Message = function (arg) {
