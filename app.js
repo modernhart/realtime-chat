@@ -8,20 +8,11 @@ var path = require('path');
 app.use(express.static('public'));
 
 app.get('/',function(req,res){
-	//res.redirect('/home');
 	res.redirect('/talk');
 });
 
-app.get('/home',function(req,res){
-	res.sendFile(__dirname+"/lobby.html");
-});
-
-app.get('/chat',function(req,res){
-	res.sendFile(__dirname+"/roomuser.html");
-});
-
 app.get('/talk',function(req,res){
-	res.sendFile(__dirname+"/chatting.html");
+	res.sendFile(__dirname + "/chatting.html");
 });
 
 
